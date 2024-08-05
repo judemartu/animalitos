@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Adivinanzas de Animales</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #ffcccb;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .form-control-lg {
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Juego de Adivinanzas de Animales</h1>
+        <div id="question-container" class="my-4">
+            <h4 id="question">Aquí irá la adivinanza</h4>
+            <input type="text" id="answer" class="form-control form-control-lg my-3" placeholder="Escribe tu respuesta">
+            <button class="btn btn-primary" onclick="checkAnswer()">OK</button>
+            <p id="result" class="mt-3"></p>
+        </div>
+        <div id="score-container" class="my-4">
+            <h4>Respuestas correctas: <span id="score">0</span></h4>
+        </div>
+        <div id="endgame-container" class="my-4" style="display: none;">
+            <button class="btn btn-success" onclick="restartGame()">Juega de nuevo</button>
+        </div>
+    </div>
+
+    <script>
+        const riddles = [
+            { question: "Soy el mejor amigo del hombre. ¿Quién soy?", answer: "PERRO" },
+            { question: "Soy el felino más grande. ¿Quién soy?", answer: "TIGRE" },
+            { question: "Cambio de piel a medida que crezco. ¿Quién soy?", answer: "LAGARTO" },
+            { question: "Tengo rayas blancas y negras. ¿Quién soy?", answer: "CEBRA" },
+            { question: "Soy conocido como el rey de la selva. ¿Quién soy?", answer: "LEON" },
+            { question: "Me gusta mucho el agua y croo croo canto. ¿Quién soy?", answer: "RANA" },
+            { question: "Vuelo de noche y me gusta la sangre. ¿Quién soy?", answer: "MURCIELAGO" },
+            { question: "Vivo en la nieve y soy blanco. ¿Quién soy?", answer: "OSO" },
+            { question: "Tengo una larga trompa y grandes orejas. ¿Quién soy?", answer: "ELEFANTE" },
+            { question: "Me cuelgo de los árboles con mi cola. ¿Quién soy?", answer: "MONO" },
+            // Agrega más acertijos aquí para un total de aproximadamente 50
+            { question: "Tengo un caparazón y soy muy lento. ¿Quién soy?", answer: "TORTUGA" },
+            { question: "Me llaman el rey de la velocidad. ¿Quién soy?", answer: "GUEPARDO" },
+            { question: "Tengo manchas negras y amarillas. ¿Quién soy?", answer: "LEOPARDO" },
+            { question: "Vivo en la Antártida y me gusta deslizarme sobre el hielo. ¿Quién soy?", answer: "PINGÜINO" },
+            { question: "Tengo una melena y soy muy fuerte. ¿Quién soy?", answer: "LEON" },
+            { question: "Vuelo de flor en flor. ¿Quién soy?", answer: "ABEJA" },
+            { question: "Cambio de color para camuflarme. ¿Quién soy?", answer: "CAMALEON" },
+            { question: "Hago nidos en los árboles. ¿Quién soy?", answer: "PAJARO" },
+            { question: "Nado en el océano y tengo una gran aleta. ¿Quién soy?", answer: "TIBURON" },
+            { question: "Tengo ocho patas y hago telarañas. ¿Quién soy?", answer: "ARAÑA" },
+            { question: "Soy el animal más grande del mundo. ¿Quién soy?", answer: "BALLENA" },
+            { question: "Vivo en el desierto y tengo una joroba. ¿Quién soy?", answer: "CAMELLO" },
+            { question: "Tengo rayas blancas y negras y parezco un caballo. ¿Quién soy?", answer: "CEBRA" },
+            { question: "Salto de hoja en hoja y soy verde. ¿Quién soy?", answer: "SALTAMONTES" },
+            { question: "Vuelo en la noche y tengo grandes ojos. ¿Quién soy?", answer: "BUHO" },
+            { question: "Vivo en el agua y tengo branquias. ¿Quién soy?", answer: "PEZ" },
+            { question: "Soy el más rápido en el aire. ¿Quién soy?", answer: "HALCON" },
+            { question: "Soy famoso por mi cuello largo. ¿Quién soy?", answer: "JIRAFA" },
+            { question: "Me llaman el rey de la sabana. ¿Quién soy?", answer: "LEON" },
+            { question: "Tengo trompa pero no soy elefante, y soy muy pequeño. ¿Quién soy?", answer: "HORMIGA" },
+            { question: "Soy el primo del burro pero más elegante. ¿Quién soy?", answer: "CABALLO" },
+            { question: "Nado en los ríos de América y soy rosado. ¿Quién soy?", answer: "DELFIN" },
+            { question: "Soy un ave que no puede volar y corro muy rápido. ¿Quién soy?", answer: "AVESTRUZ" },
+            { question: "Me llaman el rey de los mares. ¿Quién soy?", answer: "TIBURON" },
+            { question: "Duermo mucho tiempo en invierno. ¿Quién soy?", answer: "OSO" },
+            { question: "Soy famoso por mi trompa y mis orejas grandes. ¿Quién soy?", answer: "ELEFANTE" },
+            { question: "Vivo en el agua y tengo un caparazón duro. ¿Quién soy?", answer: "TORTUGA" },
+            { question: "Soy un insecto que brilla en la oscuridad. ¿Quién soy?", answer: "LUCIERNAGA" },
+            { question: "Salto y tengo una bolsa en mi vientre. ¿Quién soy?", answer: "CANGURO" },
+            { question: "Tengo manchas y un cuello largo. ¿Quién soy?", answer: "JIRAFA" },
+            { question: "Soy un mamífero marino con colmillos largos. ¿Quién soy?", answer: "MORSA" },
+            { question: "Soy un roedor que ama el queso. ¿Quién soy?", answer: "RATON" },
+            { question: "Soy conocido por construir presas. ¿Quién soy?", answer: "CASTOR" },
+            { question: "Me llaman el rey de los árboles. ¿Quién soy?", answer: "MONO" },
+            { question: "Tengo un hocico largo y me gusta comer hormigas. ¿Quién soy?", answer: "OSO HORMIGUERO" },
+            { question: "Soy un animal nocturno y tengo alas. ¿Quién soy?", answer: "MURCIELAGO" },
+            { question: "Tengo cuernos y vivo en la montaña. ¿Quién soy?", answer: "CABRA" },
+            { question: "Soy un ave que puede imitar voces humanas. ¿Quién soy?", answer: "LORO" },
+            { question: "Soy un animal de granja que da leche. ¿Quién soy?", answer: "VACA" },
+            { question: "Tengo púas y me enrollo para protegerme. ¿Quién soy?", answer: "ERIZO" },
+        ];
+
+        let currentRiddle = 0;
+        let score = 0;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function loadRiddle() {
+            if (currentRiddle < 10) {
+                document.getElementById('question').innerText = riddles[currentRiddle].question;
+                document.getElementById('answer').value = '';
+                document.getElementById('result').innerText = '';
+            } else {
+                document.getElementById('question-container').style.display = 'none';
+                document.getElementById('endgame-container').style.display = 'block';
+                document.getElementById('score-container').innerHTML = `<h4>Juego terminado. Puntuación final: ${score}</h4>`;
+            }
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answer').value.trim().toUpperCase();
+            if (userAnswer === riddles[currentRiddle].answer) {
+                score++;
+                document.getElementById('result').innerText = '¡Correcto!';
+            } else {
+                document.getElementById('result').innerText = 'Incorrecto. La respuesta correcta es ' + riddles[currentRiddle].answer;
+            }
+            document.getElementById('score').innerText = score;
+            currentRiddle++;
+            setTimeout(loadRiddle, 2000);
+        }
+
+        function restartGame() {
+            shuffle(riddles);
+            currentRiddle = 0;
+            score = 0;
+            document.getElementById('question-container').style.display = 'block';
+            document.getElementById('endgame-container').style.display = 'none';
+            document.getElementById('score').innerText = score;
+            loadRiddle();
+        }
+
+        window.onload = () => {
+            shuffle(riddles);
+            loadRiddle();
+        };
+    </script>
+</body>
+</html>
